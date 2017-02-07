@@ -72,10 +72,10 @@ meta def solve_polys (l : list expr) : tactic (list int × list expr) :=
  l' ← monad.mapm lam_bod_rec l,
  conj ← monad.foldl (λ e1 e2, to_expr `(%%e1 ∧ (%%e2 = 0))) (const `true []) l',
  vs ← expr_of_list_expr vs',
- trace "term:", trace conj,
- trace "vars:", trace vs,
+ --trace "term:", trace conj,
+ --trace "vars:", trace vs,
  sol ← run_mm_command_on_exprs_using (λ s t, "Solve[ " ++ s ++ "// LeanForm // Activate, " ++  t 
-        ++" // LeanForm // Activate, Reals]  // LUnrule  // ListConvert") 
+        ++" // LeanForm // Activate, Reals]  // LUnrule") 
         conj vs "~/lean/lean/extras/mathematica/poly.m",
  r ← to_expr `((%%sol : list (list int))),
  fstsol ← dest_list_fst r,

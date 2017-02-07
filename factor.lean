@@ -43,13 +43,12 @@ meta instance mmexpr_has_to_pexpr_power (b e : mmexpr) [mmexpr_has_to_pexpr b] [
          mmexpr_has_to_pexpr (app (sym "Power") [b, e]) :=
 ⟨_, `(%%(pexpr_of_mmexpr b) ^ %%(pexpr_of_mmexpr e))⟩
 
+lemma sq_nonneg (a : ℕ) : a^2 ≥ 0 := sorry
 
-example (x : ℕ) : true :=
+example (x : ℕ) : x*x-2*x+1 ≥ 0 :=
 by do
---x ← get_local `x,
 e ← to_expr  `(x*x - 2*x + 1),
-t ← run_mm_command_on_expr (λ s, s ++" // LeanForm // Activate // Factor // ArithConvert") e,
+t ← run_mm_command_on_expr (λ s, s ++" // LeanForm // Activate // Factor") e,
 ts ← to_expr t,
-pr ← eq_by_simp e ts,
-trace ts,
-to_expr `(trivial) >>= apply
+eq_by_simp e ts >>= rewrite_core reducible tt tt occurrences.all ff,
+to_expr `(sq_nonneg) >>= apply

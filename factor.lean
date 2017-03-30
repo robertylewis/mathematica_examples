@@ -1,54 +1,49 @@
-
 /-
 Copyright (c) 2017 Robert Y. Lewis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
 
-import init.meta.mathematica
-
+import init.meta.mathematica datatypes
 open expr tactic nat
 
 
-meta definition eq_by_simp (e1 e2 : expr) : tactic expr := do
- gl ← mk_app `eq [e1, e2],
- nm ← mk_fresh_name,
- assert nm gl,
- simp,
- tactic_orelse
-  (get_local nm)
-  (fail "unable to simplify")
+local attribute [simp] left_distrib right_distrib
 
-theorem foo (a b c : ℕ) : a * (b + c) = a * b + a * c := sorry
-theorem foo2 (a b c : ℕ) : (b + c) * a = b * a + c * a := sorry
+open mmexpr nat
 
-attribute [simp] foo foo2
+-- this will be unnecessary when the arithmetic simplifier is finished
+@[simp] lemma {u} n2a {α : Type u} [comm_ring α] (x : α) : -(x*2) = (-1)*x + (-1)*x := 
+begin rw (mul_comm x 2), change -((1+1)*x) = -1*x + -1*x, simp end
 
-instance : add_group ℕ := sorry
 
-def npow (x : ℕ) : ℕ → ℕ
-| 0 := 1
-| (k+1) := x*(npow k)
+meta def factor (e : expr) : tactic unit :=
+do t ← mathematica.run_command_on (λ s, s ++" // LeanForm // Activate // Factor") e,
+   ts ← to_expr t,
+   pf ← eq_by_simp e ts,
+   nm ← get_unused_name `h none,
+   note nm pf
 
-infix `^` := npow
-open mmexpr
+namespace tactic
+namespace interactive
+section
+open interactive.types interactive
+meta def factor (e : parse texpr) : tactic unit :=
+i_to_expr e >>= _root_.factor
+end
+end interactive
+end tactic
 
-@[simp] lemma pow_zero (x : ℕ) : x^0=1 := rfl
-@[simp] lemma pow_succ (x n : ℕ) : x^(n+1)=x*(x^n) := rfl
-@[simp] lemma nn1 : (-1 : ℕ) * -1 = 1 := sorry
-@[simp] lemma n2a (x : ℕ) : x*(-1) + x*(-1) = -(x*2) := sorry
-@[simp] lemma stn (a x : ℕ) : a - x = a + (-x) := sorry
+example (x : ℝ) : x^2-2*x+1 ≥ 0 :=
+begin
+factor x^2-2*x+1,
+rw h,
+apply sq_nonneg
+end
 
-meta instance mmexpr_has_to_pexpr_power (b e : mmexpr) [mmexpr_has_to_pexpr b] [mmexpr_has_to_pexpr e] :
-         mmexpr_has_to_pexpr (app (sym "Power") [b, e]) :=
-⟨_, `(%%(pexpr_of_mmexpr b) ^ %%(pexpr_of_mmexpr e))⟩
-
-lemma sq_nonneg (a : ℕ) : a^2 ≥ 0 := sorry
-
-example (x : ℕ) : x*x-2*x+1 ≥ 0 :=
-by do
-e ← to_expr  `(x*x - 2*x + 1),
-t ← run_mm_command_on_expr (λ s, s ++" // LeanForm // Activate // Factor") e,
-ts ← to_expr t,
-eq_by_simp e ts >>= rewrite_core reducible tt tt occurrences.all ff,
-to_expr `(sq_nonneg) >>= apply
+example (x y : ℝ) : true :=
+begin
+factor x^10-y^10,
+trace_state,
+triv
+end

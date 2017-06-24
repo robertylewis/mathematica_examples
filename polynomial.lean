@@ -18,8 +18,8 @@ meta def lam_bod_rec : expr → tactic expr
 | e := return e
 
 meta def expr_of_list_expr : list expr → tactic expr
-| [] := to_expr `([])
-| (h :: t) := do t' ← expr_of_list_expr t, to_expr `(%%h :: %%t')
+| [] := to_expr ```([])
+| (h :: t) := do t' ← expr_of_list_expr t, to_expr ```(%%h :: %%t')
 
 meta def dest_list_fst (e : expr) : tactic expr :=
 do l ← match_app_of e `list.cons,
@@ -55,7 +55,7 @@ meta def fold_apps : expr → list expr → expr
 | e (h :: t) := fold_apps (app e h) t
 
 meta def multi_exact : list expr → tactic unit
-| [] := now
+| [] := done
 | (t :: ts) := exact t >> multi_exact ts
 
 -- returns an expr k encoding a list ks and a list of proofs ps such that ps[i] proves l[i](ks) = 0
@@ -67,13 +67,13 @@ meta def solve_polys : list expr → tactic (expr × list expr)
      then fail "solve_polys failed, functions have different arities"
   else 
   do l' ← monad.mapm lam_bod_rec (h::t),
-     conj ← monad.foldl (λ e1 e2, to_expr `(%%e1 ∧ (%%e2 = 0))) (const `true []) l',
+     conj ← monad.foldl (λ e1 e2, to_expr ```(%%e1 ∧ (%%e2 = 0))) (const `true []) l',
      vs ← expr_of_list_expr vs',
      sol ← mathematica.run_command_on_2_using 
       (λ s t, "Solve[ " ++ s ++ "// LeanForm // Activate, " ++  t ++" // LeanForm // Activate, Reals] // LUnrule")
         conj vs "~/lean/lean/extras/mathematica/poly.m",
      tp ← infer_type $ list.head vs',
-     r ← to_expr `((%%sol : list (list %%tp))),
+     r ← to_expr ```((%%sol : list (list %%tp))),
      fstsol ← dest_list_fst r,
      intes ← expr_list_of_list_expr fstsol,
      apps ← monad.mapm head_beta $ list.map ((λ e, fold_apps e intes)) (h::t),
@@ -85,8 +85,8 @@ meta def strip_ex : expr → expr
 | a := a
 
 def e1 : ∃ x y : ℤ, x*x*x-y=0 ∧ y-8=0 := by
-do f ← to_expr `(λ x y : ℤ, x*x*x-y),
-   g ← to_expr `(λ x y : ℤ, y-8),
+do f ← to_expr ```(λ x y : ℤ, x*x*x-y),
+   g ← to_expr ```(λ x y : ℤ, y-8),
    (_, prs) ← solve_polys [f, g],
    constructor, constructor, constructor,
    multi_exact prs

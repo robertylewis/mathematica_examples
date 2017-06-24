@@ -3,13 +3,13 @@ Copyright (c) 2017 Robert Y. Lewis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
-import init.meta.mathematica
-open expr tactic
+import init.meta.mathematica .datatypes
+open tactic
 
-constant real : Type
+/-constant real : Type
 notation `ℝ` := real
 constant rof : linear_ordered_field ℝ
-attribute [instance] rof
+attribute [instance] rof-/
 
 constant deriv : (ℝ → ℝ) → (ℝ → ℝ)
 
@@ -22,15 +22,15 @@ open mathematica
 
 @[sym_to_pexpr]
 meta def BesselJ_trans : sym_trans_pexpr_rule :=
-⟨"BesselJ", `(BesselJ)⟩
+⟨"BesselJ", ```(BesselJ)⟩
 
 @[sym_to_expr]
 meta def pi_trans : sym_trans_expr_rule :=
-⟨"Pi", ```(pi)⟩
+⟨"Pi", `(pi)⟩
 
 @[sym_to_pexpr]
 meta def sin_trans : sym_trans_pexpr_rule :=
-⟨"Sin", `(sin)⟩
+⟨"Sin", ```(sin)⟩
 
 run_cmd mathematica.load_file "~/Dropbox/lean/mathematica_examples/bessel.m"
 
@@ -38,8 +38,8 @@ end
 
 meta def make_bessel_fn_eq (e : expr) : tactic (expr × expr) := do
  pe ← mathematica.run_command_on (λ t, t ++ "// LeanForm // Activate // FullSimplify") e,
- val ← to_expr `(%%pe : ℝ),
- tp ← to_expr `(%%e = %%val),
+ val ← to_expr ```(%%pe : ℝ),
+ tp ← to_expr ```(%%e = %%val),
  nm ← new_aux_decl_name,
  let nm' := `mathematica_axiom ++ nm,
  l ← local_context,
@@ -59,10 +59,10 @@ meta def approx (e q : expr) : tactic (expr × expr) :=
 do pe ← mathematica.run_command_on_2 
      (λ e q, "Rationalize[" ++ e ++ " // LeanForm // Activate // N, " ++ q ++ "// LeanForm // Activate]") 
      e q,
-   val ← to_expr `(%%pe : ℝ),
-   (lb, _) ← to_expr `(%%val - %%q) >>= norm_num,
-   (ub, _) ← to_expr `(%%val + %%q) >>= norm_num,
-   tgt ← to_expr `(%%lb < %%e ∧ %%e < %%ub),
+   val ← to_expr ```(%%pe : ℝ),
+   (lb, _) ← to_expr ```(%%val - %%q) >>= norm_num,
+   (ub, _) ← to_expr ```(%%val + %%q) >>= norm_num,
+   tgt ← to_expr ```(%%lb < %%e ∧ %%e < %%ub),
    nm ← new_aux_decl_name,
    let nm' := `approx_axiom ++ nm,
    let dcl := declaration.ax nm' [] tgt,
@@ -73,14 +73,14 @@ do pe ← mathematica.run_command_on_2
 namespace tactic
 namespace interactive
 section
-open lean lean.parser interactive.types interactive
+open expr lean lean.parser interactive.types interactive
 
 meta def approx (e : parse qexpr) (q : parse qexpr) : itactic := 
 do e' ← i_to_expr e,
    q' ← i_to_expr q,
    (_, prf) ← _root_.approx e' q',
    n ← get_unused_name `approx none,
-   tactic.note n prf
+   tactic.note n none prf, skip
 
 end
 end interactive

@@ -26,7 +26,7 @@ section
 open mathematica
 @[sym_to_pexpr]
 meta def pow_to_pexpr : sym_trans_pexpr_rule :=
-⟨"Power", `(npow)⟩
+⟨"Power", ```(npow)⟩
 end 
 
 @[instance] def {u} inhabited_of_has_zero {α : Type u} [has_zero α] : inhabited α := ⟨0⟩ -- works

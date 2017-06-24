@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
 
-import init.meta.mathematica bquant datatypes
+import init.meta.mathematica .bquant .datatypes
 open expr tactic
 
 
@@ -40,20 +40,20 @@ def {u} is_upper_triangular {α : Type u} [has_lt α] [has_zero α] (m : list (l
 
 meta def dec_triv_tac : tactic unit :=
 do t ← target,
-   to_expr `(dec_trivial : %%t) >>= apply
+   to_expr ```(dec_trivial : %%t) >>= apply
 
 meta def lu_tac : tactic unit := 
 do t ← target, 
    (lam _ _ _ bd) ← return $ app_arg t,
    (lam _ _ _ ande) ← return $ app_arg bd,
-   ```(%%_ ∧ %%_ ∧ %%_ = %%e) ← return $ ande,
+   `(%%_ ∧ %%_ ∧ %%_ = %%e) ← return $ ande,
    tp ← infer_type e,
    m ← mathematica.run_command_on_using
       (λ e, e ++ " // LeanForm // Activate // LUDecomp")
        e 
       "~/lean/lean/extras/mathematica/matrix_factor.m",
-   m2 ← to_expr `((%%m : list %%tp)),
-   lhs ← to_expr `(ith %%m2 0), rhs ← to_expr `(ith %%m2 1),
+   m2 ← to_expr ```((%%m : list %%tp)),
+   lhs ← to_expr ```(ith %%m2 0), rhs ← to_expr ```(ith %%m2 1),
    existsi lhs, existsi rhs,
    split, dec_triv_tac, split, dec_triv_tac, reflexivity
 

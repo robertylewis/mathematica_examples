@@ -3,7 +3,7 @@ Copyright (c) 2017 Robert Y. Lewis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
-import init.meta.mathematica
+import mathematica
 constant real : Type
 notation `ℝ` := real
 constant rof : linear_ordered_field ℝ
@@ -46,3 +46,6 @@ do m ← mk_meta_var A,
 meta definition eq_by_simp (e1 e2 : expr) : tactic expr := 
 do gl ← mk_app `eq [e1, e2],
    mk_inhabitant_using gl simp <|> fail "unable to simplify"
+
+meta def rb_map.union {key data : Type} (m1 m2 : rb_map key data) : rb_map key data :=
+m1^.fold m2 (λ k d m, m^.insert k d)

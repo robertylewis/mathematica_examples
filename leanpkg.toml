@@ -1,0 +1,6 @@
+[package]
+name = "mathematica_examples"
+version = "0.1"
+
+[dependencies]
+mathematica = {git = "https://github.com/rlewis1988/mathematica", rev = "cc3c250b5ed3c1070faece3f474ea8229bc71ac9"}

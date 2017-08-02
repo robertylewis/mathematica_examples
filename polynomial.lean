@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
 
-import init.meta.mathematica
+import mathematica
 open expr tactic int
 
 meta def lam_bod : expr → tactic expr
@@ -71,7 +71,7 @@ meta def solve_polys : list expr → tactic (expr × list expr)
      vs ← expr_of_list_expr vs',
      sol ← mathematica.run_command_on_2_using 
       (λ s t, "Solve[ " ++ s ++ "// LeanForm // Activate, " ++  t ++" // LeanForm // Activate, Reals] // LUnrule")
-        conj vs "~/lean/lean/extras/mathematica/poly.m",
+        conj vs "E:\\Dropbox\\lean\\mathematica_examples\\poly.m", --"~/lean/lean/extras/mathematica/poly.m",
      tp ← infer_type $ list.head vs',
      r ← to_expr ```((%%sol : list (list %%tp))),
      fstsol ← dest_list_fst r,

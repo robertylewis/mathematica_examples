@@ -3,7 +3,7 @@ Copyright (c) 2017 Robert Y. Lewis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
-import init.meta.mathematica .datatypes
+import mathematica .datatypes
 open tactic
 
 /-constant real : Type

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
 
-import init.meta.mathematica .bquant .datatypes
+import .bquant .datatypes
 open expr tactic
 
 
@@ -51,12 +51,11 @@ do t ← target,
    m ← mathematica.run_command_on_using
       (λ e, e ++ " // LeanForm // Activate // LUDecomp")
        e 
-      "~/lean/lean/extras/mathematica/matrix_factor.m",
+      "E:\\Dropbox\\lean\\mathematica_examples\\matrix_factor.m", --"/e/Dropbox/lean/mathematica_examples/matrix_factor.m",
    m2 ← to_expr ```((%%m : list %%tp)),
    lhs ← to_expr ```(ith %%m2 0), rhs ← to_expr ```(ith %%m2 1),
    existsi lhs, existsi rhs,
    split, dec_triv_tac, split, dec_triv_tac, reflexivity
-
 
 example : ∃ l u, is_lower_triangular l ∧ is_upper_triangular u ∧ mul_lists l u = [[(1 : ℤ), 2], [3, 4]] := 
 by lu_tac

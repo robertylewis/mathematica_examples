@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
 
-import init.meta.mathematica init.meta.rb_map datatypes
+import datatypes mathematica
 open  tactic rb_set tactic.mathematica
 section
 open expr
@@ -36,8 +36,7 @@ do hyps ← local_context,
    t ← target,
    vars ← return $ rb_map.keys $ list.foldr (λ e s, rb_map.union s (find_locals e)) mk_expr_set (t::hypt),
    sanity_check_aux hypt vars
-   
-end
+
 
 example (x : ℤ) (h : x < 0) : x < 0 :=
 by sanity_check; admit
@@ -46,6 +45,8 @@ example (x : ℝ) (h1 : sin x = 0) (h2 : cos x > 0)
  : x = 0 :=
 by sanity_check; admit
 
-example (x : ℝ) (h1 : sin x = 0) (h2 : cos x > 0) (h3 : -pi < x ∧ x < pi)
+example (x : ℝ) (h1 : sin x = 0) (h2 : cos x > 0) (h3 : -_root_.pi < x ∧ x < pi)
  : x = 0 :=
-by sanity_check; admit
+by sanity_check; admit 
+
+end

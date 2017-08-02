@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
 
-import init.meta.mathematica datatypes
+import datatypes
 open expr tactic nat
 
 
@@ -37,18 +37,19 @@ end
 end interactive
 end tactic
 
-
-example (x : ℝ) : x^2-2*x+1 ≥ 0 :=
+/-example (x : ℝ) : x^2-2*x+1 ≥ 0 :=
 begin
 factor x^2-2*x+1 using q,
 rewrite q,
 apply sq_nonneg
-end
+end-/
+set_option profiler true
 
 example (x y : ℝ) : true :=
 begin
-factor x^10-y^10,
+factor (x^10-y^10),
 trace_state,
 triv
 end
  
+

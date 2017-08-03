@@ -51,7 +51,7 @@ do t ← target,
    m ← mathematica.run_command_on_using
       (λ e, e ++ " // LeanForm // Activate // LUDecomp")
        e 
-      "E:\\Dropbox\\lean\\mathematica_examples\\matrix_factor.m", --"/e/Dropbox/lean/mathematica_examples/matrix_factor.m",
+      "matrix_factor.m",
    m2 ← to_expr ```((%%m : list %%tp)),
    lhs ← to_expr ```(ith %%m2 0), rhs ← to_expr ```(ith %%m2 1),
    existsi lhs, existsi rhs,

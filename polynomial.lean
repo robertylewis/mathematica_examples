@@ -71,7 +71,7 @@ meta def solve_polys : list expr → tactic (expr × list expr)
      vs ← expr_of_list_expr vs',
      sol ← mathematica.run_command_on_2_using 
       (λ s t, "Solve[ " ++ s ++ "// LeanForm // Activate, " ++  t ++" // LeanForm // Activate, Reals] // LUnrule")
-        conj vs "E:\\Dropbox\\lean\\mathematica_examples\\poly.m", --"~/lean/lean/extras/mathematica/poly.m",
+        conj vs "poly.m",
      tp ← infer_type $ list.head vs',
      r ← to_expr ```((%%sol : list (list %%tp))),
      fstsol ← dest_list_fst r,
@@ -80,7 +80,7 @@ meta def solve_polys : list expr → tactic (expr × list expr)
      zrprs ← monad.mapm (λ e, do e' ← norm_num e, return e'.2) apps,
      return (fstsol, zrprs)
 
-meta def strip_ex : expr → expr 
+meta def strip_ex : expr → expr
 | (app (app (const `Exists _) _) (lam _ _ _ bod)) := strip_ex bod
 | a := a
 
@@ -90,3 +90,4 @@ do f ← to_expr ```(λ x y : ℤ, x*x*x-y),
    (_, prs) ← solve_polys [f, g],
    constructor, constructor, constructor,
    multi_exact prs
+ 

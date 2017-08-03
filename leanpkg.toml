@@ -3,4 +3,4 @@ name = "mathematica_examples"
 version = "0.1"
 
 [dependencies]
-mathematica = {git = "https://github.com/rlewis1988/mathematica", rev = "cc3c250b5ed3c1070faece3f474ea8229bc71ac9"}
+mathematica = {git = "https://github.com/rlewis1988/mathematica", rev = "3835e6380cf10208e99f0db4e7c37be83dee3eee"}

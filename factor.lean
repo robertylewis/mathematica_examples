@@ -39,7 +39,7 @@ end tactic
 
 example (x : ℝ) : x^2-2*x+1 ≥ 0 :=
 begin
-factor x^2-2*x+1 using q,
+factor x^2-2*x+1 using q, 
 rewrite q,
 apply sq_nonneg
 end

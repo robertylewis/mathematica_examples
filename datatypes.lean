@@ -45,7 +45,7 @@ do m ← mk_meta_var A,
 
 meta definition eq_by_simp (e1 e2 : expr) : tactic expr := 
 do gl ← mk_app `eq [e1, e2],
-   mk_inhabitant_using gl simp <|> fail "unable to simplify"
+   mk_inhabitant_using gl `[simp] <|> fail "unable to simplify"
 
 meta def rb_map.union {key data : Type} (m1 m2 : rb_map key data) : rb_map key data :=
 m1^.fold m2 (λ k d m, m^.insert k d)

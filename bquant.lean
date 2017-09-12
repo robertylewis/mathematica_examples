@@ -54,7 +54,7 @@ section
   begin
    intro, cases a with w Hw, cases Hw with hltsn hp, 
    cases (nat.eq_or_lt_of_le (le_of_succ_le_succ hltsn)) with heq hltn,
-   {apply H₂, rw -heq, apply hp} ,
+   {apply H₂, simp * at *} ,
    {apply H₁, fapply exists.intro, apply w, split, repeat {assumption}}
   end
   
@@ -100,7 +100,7 @@ section
          (λ p_pos, is_true (ball_succ_of_ball ih_pos p_pos))))
 
 theorem lt_succ_iff_le (a b : ℕ) : a < (succ b) ↔ a ≤ b := 
-⟨suppose a < (succ b), le_of_lt_succ this, suppose a ≤ b, lt_of_le_of_lt this (lt_succ_self _)⟩
+⟨le_of_lt_succ, λ h, lt_of_le_of_lt h (lt_succ_self _)⟩
 
   instance decidable_bex_le (n : nat) (P : nat → Prop) [decidable_pred P]
     : decidable (∃ x, x ≤ n ∧ P x) :=

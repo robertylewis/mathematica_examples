@@ -32,8 +32,8 @@ meta def pi_trans : sym_trans_expr_rule :=
 meta def sin_trans : sym_trans_pexpr_rule :=
 ⟨"Sin", ```(sin)⟩
 
-run_cmd mathematica.load_file "~/Dropbox/lean/mathematica_examples/bessel.m"
-
+run_cmd mathematica.load_file "bessel.m"
+ 
 end
 
 meta def make_bessel_fn_eq (e : expr) : tactic (expr × expr) := do
@@ -75,7 +75,7 @@ namespace interactive
 section
 open expr lean lean.parser interactive.types interactive
 
-meta def approx (e : parse qexpr) (q : parse qexpr) : itactic := 
+meta def approx (e : parse parser.pexpr) (q : parse parser.pexpr) : itactic := 
 do e' ← i_to_expr e,
    q' ← i_to_expr q,
    (_, prf) ← _root_.approx e' q',

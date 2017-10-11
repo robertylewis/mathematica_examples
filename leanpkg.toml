@@ -1,7 +1,7 @@
 [package]
 name = "mathematica_examples"
 version = "0.1"
-lean_version = "master"
+lean_version = "3.3.0"
 
 [dependencies]
-mathematica = {git = "https://github.com/rlewis1988/mathematica.git", rev = "a9c6ffa3a626639f36e8ac3f205b7a5dbbe72c4b"}
+mathematica = {git = "https://github.com/rlewis1988/mathematica.git", rev = "0ebb45d8df7a2a9580c18117d3aaad90a2e91b88"}

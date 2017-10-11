@@ -32,8 +32,9 @@ meta def pi_trans : sym_trans_expr_rule :=
 meta def sin_trans : sym_trans_pexpr_rule :=
 ⟨"Sin", ```(sin)⟩
 
-run_cmd mathematica.load_file "bessel.m"
- 
+-- uncomment the following line and adjust if necessary
+--run_cmd mathematica.load_file "bessel.m"
+--run_cmd mathematica.execute "Get[\\\"E:\\\\\\Dropbox\\\\\\lean\\\\\\mathematica_examples\\\\\\extras\\\\\\bessel.m\\\"]" >>= trace
 end
 
 meta def make_bessel_fn_eq (e : expr) : tactic (expr × expr) := do

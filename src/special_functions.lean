@@ -37,24 +37,24 @@ meta def sin_trans : sym_trans_pexpr_rule :=
 --run_cmd mathematica.execute "Get[\\\"E:\\\\\\Dropbox\\\\\\lean\\\\\\mathematica_examples\\\\\\extras\\\\\\bessel.m\\\"]" >>= trace
 end
 
-meta def make_bessel_fn_eq (e : expr) : tactic (expr × expr) := do
- pe ← mathematica.run_command_on (λ t, t ++ "// LeanForm // Activate // FullSimplify") e,
- val ← to_expr ```(%%pe : ℝ),
- tp ← to_expr ```(%%e = %%val),
- nm ← new_aux_decl_name,
- let nm' := `mathematica_axiom ++ nm,
- l ← local_context,
- l' ← mfilter (kdepends_on tp) l,
- gls ← get_goals,
- m ← mk_meta_var tp,
- set_goals [m],
- generalizes l',
- tp' ← target,
- set_goals gls,
- let dcl := declaration.ax nm' [] tp',
- add_decl dcl,
- prf ← mk_const nm',
- return (val, prf)
+meta def make_bessel_fn_eq (e : expr) : tactic (expr × expr) := 
+do pe ← mathematica.run_command_on (λ t, t ++ "// LeanForm // Activate // FullSimplify") e,
+   val ← to_expr ```(%%pe : ℝ),
+   tp ← to_expr ```(%%e = %%val),
+   nm ← new_aux_decl_name,
+   let nm' := `mathematica_axiom ++ nm,
+   l ← local_context,
+   l' ← mfilter (kdepends_on tp) l,
+   gls ← get_goals,
+   m ← mk_meta_var tp,
+   set_goals [m],
+   generalizes l',
+   tp' ← target,
+   set_goals gls,
+   let dcl := declaration.ax nm' [] tp',
+   add_decl dcl,
+   prf ← mk_const nm',
+   return (val, prf)
 
 meta def approx (e q : expr) : tactic (expr × expr) :=
 do pe ← mathematica.run_command_on_2 
@@ -89,11 +89,11 @@ end tactic
 
 
 variable x : ℝ
-
-def f1 : x*BesselJ 2 x + x*BesselJ 0 x = 2*BesselJ 1 x := by do
- (t, _) ← target >>= match_eq,
- (_, prf) ← make_bessel_fn_eq t,
- apply prf
+#exit
+def f1 : x*BesselJ 2 x + x*BesselJ 0 x = 2*BesselJ 1 x := 
+by do (t, _) ← target >>= match_eq,
+      (_, prf) ← make_bessel_fn_eq t,
+      apply prf
 
 
 #check mathematica_axiom.f1._aux_1
@@ -102,9 +102,9 @@ def f1 : x*BesselJ 2 x + x*BesselJ 0 x = 2*BesselJ 1 x := by do
 
 theorem apr : true :=
 begin
-approx (100*BesselJ 2 0.52) (0.00001 : ℝ),
-trace_state,
-triv
+  approx (100*BesselJ 2 0.52) (0.00001 : ℝ),
+  trace_state,
+  triv
 end
 
 #print axioms 

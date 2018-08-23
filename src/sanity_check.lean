@@ -5,9 +5,9 @@ Author: Robert Y. Lewis
 -/
 
 import datatypes mathematica
-open  tactic rb_set tactic.mathematica
+open  tactic native.rb_set tactic.mathematica
 section
-open expr
+open expr native
 meta def find_locals : expr → expr_set :=
 λ e, e^.fold (mk_expr_set) (λ e' _ l, if is_local_constant e' then l^.insert e' else l)
 

@@ -7,7 +7,6 @@ Author: Robert Y. Lewis
 import datatypes
 open expr tactic nat
 
-
 local attribute [simp] left_distrib right_distrib
 
 open mmexpr nat
@@ -36,10 +35,6 @@ do e' ← i_to_expr e,
 end
 end interactive
 end tactic
-
-@[simp] lemma f3 (x : ℝ) : 3*x = x + x + x := sorry
-@[simp] lemma f2 (x : ℝ) : x*2 =  x + x := sorry
-
 
 example (x : ℝ) : 1 - 2*x + 3*x^2 - 2*x^3 + x^4 ≥ 0 :=
 begin

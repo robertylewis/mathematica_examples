@@ -1,32 +1,32 @@
+
 /-
 Copyright (c) 2017 Robert Y. Lewis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
-import mathematica
-constant real : Type
-notation `ℝ` := real
-constant rof : linear_ordered_field ℝ
-attribute [instance] rof
+import mathematica data.real.basic tactic.ring
+open native 
+
 constants (sin cos tan : ℝ → ℝ) (pi : ℝ)
-def {u} npow {α : Type u} [has_mul α] [has_one α] : α → ℕ → α
+
+/-def {u} npow {α : Type u} [has_mul α] [has_one α] : α → ℕ → α
 | r 0 := 1
 | r (n+1) := r*npow r n
-infix `^` := npow
+local infix `^` := npow-/
 
-@[simp] lemma rpow_zero (r : ℝ) : r^0 = 1 := rfl
-@[simp] lemma rpow_succ (r : ℝ) (n : ℕ) : r^(n+1) = r*r^n := rfl
+--noncomputable instance real.has_pow : has_pow ℝ ℕ := ⟨npow⟩ 
 
-lemma sq_nonneg {α : Type} [linear_ordered_ring α] (a : α) : a^2 ≥ 0 := 
-begin
-unfold npow, rw mul_one, apply mul_self_nonneg
-end
+--@[simp] lemma rpow_zero (r : ℝ) : r^0 = 1 := rfl
+--@[simp] lemma rpow_succ (r : ℝ) (n : ℕ) : r^(n+1) = r*r^n := rfl
+
+lemma sq_nonneg {α : Type*} [linear_ordered_ring α] (a : α) : a^2 ≥ 0 := 
+show a * (a * 1) ≥ 0, by rw mul_one; apply mul_self_nonneg
 
 section
 open mathematica
 @[sym_to_pexpr]
 meta def pow_to_pexpr : sym_trans_pexpr_rule :=
-⟨"Power", ```(npow)⟩
+⟨"Power", ```(has_pow.pow)⟩
 end 
 
 @[instance] def {u} inhabited_of_has_zero {α : Type u} [has_zero α] : inhabited α := ⟨0⟩ -- works
@@ -38,14 +38,15 @@ do m ← mk_meta_var A,
    set_goals [m],
    t,
    n ← num_goals,
-   if n > 0 then fail "mk_inhabitant_using failed" else do
+   if n > 0 then trace_state >> fail "mk_inhabitant_using failed" else do
    r ← instantiate_mvars m,
    set_goals gs,
    return r
 
 meta definition eq_by_simp (e1 e2 : expr) : tactic expr := 
 do gl ← mk_app `eq [e1, e2],
-   mk_inhabitant_using gl `[simp] <|> fail "unable to simplify"
+   --mk_inhabitant_using gl `[ring] <|> (fail "unable to simplify")
+   prod.snd <$> solve_aux gl (`[ring] >> done) <|> (fail "unable to simplify")
 
 meta def rb_map.union {key data : Type} (m1 m2 : rb_map key data) : rb_map key data :=
 m1^.fold m2 (λ k d m, m^.insert k d)

@@ -1,0 +1,9 @@
+[package]
+name = "mathematica_examples"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.16.3"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "d59adc18dfa75566ec8805add7d4404b5066eb94"}
+mathematica = {git = "https://github.com/robertylewis/mathematica", rev = "fc46fbd0f658cb9b0b52f52ca1dea4b3f7d044e0"}

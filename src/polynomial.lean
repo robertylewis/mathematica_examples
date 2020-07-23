@@ -6,42 +6,16 @@ Author: Robert Y. Lewis
 -/
 
 import mathematica
+import tactic.core tactic.find tactic.norm_num
+import data.real.pi
 open expr tactic int
-
-meta def lam_bod : expr → tactic expr
-| (lam nm bi tp bd) :=
-  do head_beta $ app (lam nm bi tp bd) (local_const nm nm bi tp)
-| e := return e
-
-meta def lam_bod_rec : expr → tactic expr
-| (lam nm bi tp bd) := lam_bod (lam nm bi tp bd) >>= lam_bod_rec
-| e := return e
 
 meta def expr_of_list_expr : list expr → tactic expr
 | [] := to_expr ```([])
 | (h :: t) := do t' ← expr_of_list_expr t, to_expr ```(%%h :: %%t')
 
 meta def dest_list_fst (e : expr) : tactic expr :=
-do l ← match_app_of e `list.cons,
-   match list.nth l 1 with
-   | some k := return k
-   | none := failed
-   end
-
-meta def dest_list_snd (e : expr) : tactic (expr × expr) := 
-do l ← match_app_of e `list.cons,
-   match (list.nth l 1, list.nth l 2) with
-   | (some k1, some l') := do k2 ← dest_list_fst l', return (k1, k2)
-   | _ := failed
-   end
-
-meta def count_poly_vars : expr → nat
-| (lam _ _ _ bd) := count_poly_vars bd + 1
-| _ := 0
-
-meta def get_poly_vars : expr → list expr
-| (lam nm bi tp bd) := local_const nm nm bi tp :: get_poly_vars bd
-| _ := []
+do _::k::_ ← match_app_of e `list.cons, return k
 
 meta def expr_list_of_list_expr : expr → tactic (list expr)
 | (app (app (app (const `list.cons _) _) h) t) := 
@@ -50,44 +24,40 @@ do t' ← expr_list_of_list_expr t,
 | (app (const `list.nil _) _) := return []
 | _ := failed
 
-meta def fold_apps : expr → list expr → expr
-| e [] := e
-| e (h :: t) := fold_apps (app e h) t
 
-meta def multi_exact : list expr → tactic unit
-| [] := done
-| (t :: ts) := exact t >> multi_exact ts
+meta def mk_local_lambdas : expr → tactic (list expr × expr)
+| (expr.lam n bi d b) := do
+  p ← mk_local' n bi d,
+  (ps, r) ← mk_local_lambdas (expr.instantiate_var b p),
+  return ((p :: ps), r)
+| e := return ([], e)
 
--- returns an expr k encoding a list ks and a list of proofs ps such that ps[i] proves l[i](ks) = 0
-meta def solve_polys : list expr → tactic (expr × list expr)
-| [] := fail "solve_polys failed, no functions given"
-| (h :: t) := 
-  let vs' := get_poly_vars h in
-  if bnot (list.all (h::t) (λ p, if count_poly_vars p = count_poly_vars h then tt else ff)) 
-     then fail "solve_polys failed, functions have different arities"
-  else 
-  do l' ← monad.mapm lam_bod_rec (h::t),
-     conj ← monad.foldl (λ e1 e2, to_expr ```(%%e1 ∧ (%%e2 = 0))) (const `true []) l',
-     vs ← expr_of_list_expr vs',
-     sol ← mathematica.run_command_on_2_using 
+meta def exists_to_lambda : expr → expr 
+| (app (app (const `Exists _) _) (lam nm bi tp bod)) := lam nm bi tp (exists_to_lambda bod)
+| a := a 
+
+meta def find_sols : tactic unit :=
+do lamd ← exists_to_lambda <$> target,
+   (lcls, bod) ← mk_local_lambdas lamd,
+   lcls' ← expr_of_list_expr lcls,
+   sol ← mathematica.run_command_on_2_using 
       (λ s t, "Solve[ " ++ s ++ "// LeanForm // Activate, " ++  t ++" // LeanForm // Activate, Reals] // LUnrule")
-        conj vs "poly.m",
-     tp ← infer_type $ list.head vs',
-     r ← to_expr ```((%%sol : list (list %%tp))),
-     fstsol ← dest_list_fst r,
-     intes ← expr_list_of_list_expr fstsol,
-     apps ← monad.mapm head_beta $ list.map ((λ e, fold_apps e intes)) (h::t),
-     zrprs ← monad.mapm (λ e, do e' ← norm_num e, return e'.2) apps,
-     return (fstsol, zrprs)
+        bod lcls' "poly.m",
+  trace sol,
+   tp ← infer_type lcls.head,
+   trace tp,
+   to_expr ``(%%sol : list (list %%tp)) >>= dest_list_fst >>= expr_list_of_list_expr >>= trace,
+   intes ← to_expr ``(%%sol : list (list %%tp)) >>= dest_list_fst >>= expr_list_of_list_expr,
+   intes.mmap' existsi,
+   `[simp; norm_num]
 
-meta def strip_ex : expr → expr
-| (app (app (const `Exists _) _) (lam _ _ _ bod)) := strip_ex bod
-| a := a
+-- lemma e1 : ∃ x y : ℤ, x*x*x-y=0 ∧ y-8=0 := by find_sols 
+set_option trace.mathematica true 
+lemma e2 : ∃ r : ℝ, r+r = 3 := by find_sols
 
-def e1 : ∃ x y : ℤ, x*x*x-y=0 ∧ y-8=0 := by
-do f ← to_expr ```(λ x y : ℤ, x*x*x-y),
-   g ← to_expr ```(λ x y : ℤ, y-8),
-   (_, prs) ← solve_polys [f, g],
-   constructor, constructor, constructor,
-   multi_exact prs
- 
+@[sym_to_pexpr]
+meta def pi_to_expr : mathematica.sym_trans_pexpr_rule :=
+⟨"Pi", ``(real.pi)⟩
+
+
+lemma e3 : ∃ r : ℝ, 1 < r ∧ r < 4 ∧ real.sin r = 1 := by try_for 1000 {find_sols}

@@ -1,3 +1,4 @@
+#exit
 /-
 Copyright (c) 2014 Microsoft Corporation. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -33,7 +34,7 @@ section
 
   theorem not_bex_zero (P : nat → Prop) : ¬ bex 0 P :=
   λ ⟨w, Hw⟩, and.rec_on Hw (λ h₁ h₂, absurd h₁ (not_lt_zero w))
-  
+
 
   theorem not_bsub_zero (P : nat → Prop) : bsub 0 P → false :=
   λ H, absurd (bex_of_bsub H) (not_bex_zero P)
@@ -52,12 +53,12 @@ section
 
   theorem not_bex_succ {P : nat → Prop} {n : nat} (H₁ : ¬ bex n P) (H₂ : ¬ P n) : ¬ bex (succ n) P :=
   begin
-   intro, cases a with w Hw, cases Hw with hltsn hp, 
+   intro, cases a with w Hw, cases Hw with hltsn hp,
    cases (nat.eq_or_lt_of_le (le_of_succ_le_succ hltsn)) with heq hltn,
    {apply H₂, simp * at *} ,
    {apply H₁, fapply exists.intro, apply w, split, repeat {assumption}}
   end
-  
+
   theorem not_bsub_succ {P : nat → Prop} {n : nat} (H₁ : ¬ bex n P) (H₂ : ¬ P n) : bsub (succ n) P → false :=
   λ H, absurd (bex_of_bsub H) (not_bex_succ H₁ H₂)
 
@@ -99,7 +100,7 @@ section
          (λ p_neg, is_false (not_ball_of_not p_neg))
          (λ p_pos, is_true (ball_succ_of_ball ih_pos p_pos))))
 
-theorem lt_succ_iff_le (a b : ℕ) : a < (succ b) ↔ a ≤ b := 
+theorem lt_succ_iff_le (a b : ℕ) : a < (succ b) ↔ a ≤ b :=
 ⟨le_of_lt_succ, λ h, lt_of_le_of_lt h (lt_succ_self _)⟩
 
   instance decidable_bex_le (n : nat) (P : nat → Prop) [decidable_pred P]

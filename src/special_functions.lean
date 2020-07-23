@@ -3,14 +3,11 @@ Copyright (c) 2017 Robert Y. Lewis. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Robert Y. Lewis
 -/
-import mathematica .datatypes
+import mathematica datatypes
+import data.real.basic
 open tactic
 
-/-constant real : Type
-notation `ℝ` := real
-constant rof : linear_ordered_field ℝ
-attribute [instance] rof-/
-
+open real
 constant deriv : (ℝ → ℝ) → (ℝ → ℝ)
 
 constant BesselJ (n : ℝ) (z : ℝ) : ℝ
@@ -24,20 +21,12 @@ open mathematica
 meta def BesselJ_trans : sym_trans_pexpr_rule :=
 ⟨"BesselJ", ```(BesselJ)⟩
 
-@[sym_to_expr]
-meta def pi_trans : sym_trans_expr_rule :=
-⟨"Pi", `(pi)⟩
-
-@[sym_to_pexpr]
-meta def sin_trans : sym_trans_pexpr_rule :=
-⟨"Sin", ```(sin)⟩
-
 -- uncomment the following line and adjust if necessary
 --run_cmd mathematica.load_file "bessel.m"
 --run_cmd mathematica.execute "Get[\\\"E:\\\\\\Dropbox\\\\\\lean\\\\\\mathematica_examples\\\\\\extras\\\\\\bessel.m\\\"]" >>= trace
 end
 
-meta def make_bessel_fn_eq (e : expr) : tactic (expr × expr) := 
+meta def make_bessel_fn_eq (e : expr) : tactic (expr × expr) :=
 do pe ← mathematica.run_command_on (λ t, t ++ "// LeanForm // Activate // FullSimplify") e,
    val ← to_expr ```(%%pe : ℝ),
    tp ← to_expr ```(%%e = %%val),
@@ -57,8 +46,8 @@ do pe ← mathematica.run_command_on (λ t, t ++ "// LeanForm // Activate // Ful
    return (val, prf)
 
 meta def approx (e q : expr) : tactic (expr × expr) :=
-do pe ← mathematica.run_command_on_2 
-     (λ e q, "Rationalize[" ++ e ++ " // LeanForm // Activate // N, " ++ q ++ "// LeanForm // Activate]") 
+do pe ← mathematica.run_command_on_2
+     (λ e q, "Rationalize[" ++ e ++ " // LeanForm // Activate // N, " ++ q ++ "// LeanForm // Activate]")
      e q,
    val ← to_expr ```(%%pe : ℝ),
    (lb, _) ← to_expr ```(%%val - %%q) >>= norm_num,
@@ -76,7 +65,7 @@ namespace interactive
 section
 open expr lean lean.parser interactive.types interactive
 
-meta def approx (e : parse parser.pexpr) (q : parse parser.pexpr) : itactic := 
+meta def approx (e : parse parser.pexpr) (q : parse parser.pexpr) : itactic :=
 do e' ← i_to_expr e,
    q' ← i_to_expr q,
    (_, prf) ← _root_.approx e' q',
@@ -90,7 +79,7 @@ end tactic
 
 variable x : ℝ
 #exit
-def f1 : x*BesselJ 2 x + x*BesselJ 0 x = 2*BesselJ 1 x := 
+def f1 : x*BesselJ 2 x + x*BesselJ 0 x = 2*BesselJ 1 x :=
 by do (t, _) ← target >>= match_eq,
       (_, prf) ← make_bessel_fn_eq t,
       apply prf
@@ -107,9 +96,9 @@ begin
   triv
 end
 
-#print axioms 
+#print axioms
 
---run_cmd mathematica.run_command_on (λ t, "Rationalize[" ++t ++ "//LeanForm // Activate // N, .01]") ```(100*BesselJ 2 0.52) >>= λ t, to_expr `((%%t : ℝ)) >>= trace 
+--run_cmd mathematica.run_command_on (λ t, "Rationalize[" ++t ++ "//LeanForm // Activate // N, .01]") ```(100*BesselJ 2 0.52) >>= λ t, to_expr `((%%t : ℝ)) >>= trace
 
 #exit
 --run_cmd mathematica.run_command_on (λ t, t ++ "//LeanForm//Activate") ```(2+2) >>= λ t, to_expr `((%%t : ℕ)) >>= trace

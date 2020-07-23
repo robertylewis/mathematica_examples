@@ -10,9 +10,12 @@ import tactic.core tactic.find tactic.norm_num
 import data.real.pi
 open expr tactic int
 
-meta def expr_of_list_expr : list expr → tactic expr
-| [] := to_expr ```([])
-| (h :: t) := do t' ← expr_of_list_expr t, to_expr ```(%%h :: %%t')
+meta def pexpr_of_list_expr : list expr → pexpr 
+| [] := ``([])
+| (h::t) := ``(%%h::%%(pexpr_of_list_expr t) : list _)
+
+meta def expr_of_list_expr : list expr → tactic expr :=
+to_expr ∘ pexpr_of_list_expr
 
 meta def dest_list_fst (e : expr) : tactic expr :=
 do _::k::_ ← match_app_of e `list.cons, return k
@@ -43,21 +46,12 @@ do lamd ← exists_to_lambda <$> target,
    sol ← mathematica.run_command_on_2_using 
       (λ s t, "Solve[ " ++ s ++ "// LeanForm // Activate, " ++  t ++" // LeanForm // Activate, Reals] // LUnrule")
         bod lcls' "poly.m",
-  trace sol,
    tp ← infer_type lcls.head,
-   trace tp,
-   to_expr ``(%%sol : list (list %%tp)) >>= dest_list_fst >>= expr_list_of_list_expr >>= trace,
    intes ← to_expr ``(%%sol : list (list %%tp)) >>= dest_list_fst >>= expr_list_of_list_expr,
    intes.mmap' existsi,
-   `[simp; norm_num]
+   `[norm_num]
 
--- lemma e1 : ∃ x y : ℤ, x*x*x-y=0 ∧ y-8=0 := by find_sols 
-set_option trace.mathematica true 
+lemma e1 : ∃ x y : ℤ, x*x*x-y=0 ∧ y-8=0 := by find_sols 
+
 lemma e2 : ∃ r : ℝ, r+r = 3 := by find_sols
 
-@[sym_to_pexpr]
-meta def pi_to_expr : mathematica.sym_trans_pexpr_rule :=
-⟨"Pi", ``(real.pi)⟩
-
-
-lemma e3 : ∃ r : ℝ, 1 < r ∧ r < 4 ∧ real.sin r = 1 := by try_for 1000 {find_sols}

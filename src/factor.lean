@@ -5,7 +5,6 @@ Author: Robert Y. Lewis
 -/
 
 import mathematica
-import datatypes
 import data.real.basic
 open expr tactic nat mmexpr
 
@@ -18,12 +17,11 @@ and this equality is added to the context as a hypothesis with name `nm`.
 meta def factor (e : expr) (nm : option name) : tactic unit :=
 do t ← mathematica.run_command_on (λ s, s ++" // LeanForm // Activate // Factor") e,
    ts ← to_expr t,
-   pf ← eq_by_ring e ts,
+   (_, pf) ← to_expr ``(%%e = %%ts) >>= λ tgt, solve_aux tgt `[ring, done],
    match nm with
    | some n := note n none pf >> skip
    | none := do n ← get_unused_name `h none, note n none pf, skip
    end
-
 
 namespace tactic
 namespace interactive

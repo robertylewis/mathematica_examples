@@ -7,16 +7,14 @@ Author: Robert Y. Lewis
 import mathematica
 import datatypes
 import data.real.basic
-open expr tactic nat
+open expr tactic nat mmexpr
 
-local attribute [simp] left_distrib right_distrib
-
-open mmexpr nat
-
--- this will be unnecessary when the arithmetic simplifier is finished
-@[simp] lemma {u} n2a {α : Type u} [comm_ring α] (x : α) : -(x*2) = (-1)*x + (-1)*x :=
-begin rw (mul_comm x 2), change -((1+1)*x) = -1*x + -1*x, simp end
-
+/--
+`factor e nm` takes an expression representing a polynomial, like `` `(x^2-1)``.
+It gets translated to Mathematica, factored, and reconstructed.
+The `ring` tactic is called to prove that the input `e` is equal to the result,
+and this equality is added to the context as a hypothesis with name `nm`.
+-/
 meta def factor (e : expr) (nm : option name) : tactic unit :=
 do t ← mathematica.run_command_on (λ s, s ++" // LeanForm // Activate // Factor") e,
    ts ← to_expr t,
@@ -29,15 +27,20 @@ do t ← mathematica.run_command_on (λ s, s ++" // LeanForm // Activate // Fact
 
 namespace tactic
 namespace interactive
-section
-open interactive.types interactive
+
+setup_tactic_parser
+
 meta def factor (e : parse texpr) (nm : parse using_ident) : tactic unit :=
 do e' ← i_to_expr e,
    _root_.factor e' nm
-end
+
 end interactive
 end tactic
 
+/-
+In these first two examples we prove that polynomials are nonnegative
+by factoring them into squares.
+-/
 example (x : ℝ) : 1 - 2*x + 3*x^2 - 2*x^3 + x^4 ≥ 0 :=
 begin
  factor  1 - 2*x + 3*x^2 - 2*x^3 + x^4  using h,
@@ -52,6 +55,16 @@ rewrite q,
 apply pow_two_nonneg
 end
 
+/-
+Here we factor a larger polynomial and trace the state afterward:
+
+x y : ℝ,
+h :
+  x ^ 10 - y ^ 10 =
+    (x + (-1) * y) * (x + y) * (x ^ 4 + (-1) * x ^ 3 * y + x ^ 2 * y ^ 2 + (-1) * x * y ^ 3 + y ^ 4) *
+      (x ^ 4 + x ^ 3 * y + x ^ 2 * y ^ 2 + x * y ^ 3 + y ^ 4)
+⊢ true
+-/
 example (x y : ℝ) : true :=
 begin
 factor (x^10-y^10),

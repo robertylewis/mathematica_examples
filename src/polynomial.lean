@@ -6,11 +6,21 @@ Author: Robert Y. Lewis
 -/
 
 import mathematica
-import tactic.core tactic.find tactic.norm_num
+import tactic.norm_num
 import data.real.pi
 open expr tactic int
 
-meta def pexpr_of_list_expr : list expr → pexpr 
+/-!
+The examples in this file show how we can use Mathematica to solve polynomial equations
+and then verify the results in Lean using the tactic `norm_num`,
+which simplifies numeral arithmetic.
+-/
+
+/-!
+Auxiliary functions about lists.
+-/
+
+meta def pexpr_of_list_expr : list expr → pexpr
 | [] := ``([])
 | (h::t) := ``(%%h::%%(pexpr_of_list_expr t) : list _)
 
@@ -21,12 +31,11 @@ meta def dest_list_fst (e : expr) : tactic expr :=
 do _::k::_ ← match_app_of e `list.cons, return k
 
 meta def expr_list_of_list_expr : expr → tactic (list expr)
-| (app (app (app (const `list.cons _) _) h) t) := 
+| (app (app (app (const `list.cons _) _) h) t) :=
 do t' ← expr_list_of_list_expr t,
    return $ h :: t'
 | (app (const `list.nil _) _) := return []
 | _ := failed
-
 
 meta def mk_local_lambdas : expr → tactic (list expr × expr)
 | (expr.lam n bi d b) := do
@@ -35,15 +44,20 @@ meta def mk_local_lambdas : expr → tactic (list expr × expr)
   return ((p :: ps), r)
 | e := return ([], e)
 
-meta def exists_to_lambda : expr → expr 
+meta def exists_to_lambda : expr → expr
 | (app (app (const `Exists _) _) (lam nm bi tp bod)) := lam nm bi tp (exists_to_lambda bod)
-| a := a 
+| a := a
 
+
+/--
+This tactic tries to prove a goal of the form `∃ x1 ... xn, _` by asking Mathematica to produce
+values `x1 ... xn`. Given these values, it tries to close the goal by calling `norm_num`.
+-/
 meta def find_sols : tactic unit :=
 do lamd ← exists_to_lambda <$> target,
    (lcls, bod) ← mk_local_lambdas lamd,
    lcls' ← expr_of_list_expr lcls,
-   sol ← mathematica.run_command_on_2_using 
+   sol ← mathematica.run_command_on_2_using
       (λ s t, "Solve[ " ++ s ++ "// LeanForm // Activate, " ++  t ++" // LeanForm // Activate, Reals] // LUnrule")
         bod lcls' "poly.m",
    tp ← infer_type lcls.head,
@@ -51,7 +65,10 @@ do lamd ← exists_to_lambda <$> target,
    intes.mmap' existsi,
    `[norm_num]
 
-lemma e1 : ∃ x y : ℤ, x*x*x-y=0 ∧ y-8=0 := by find_sols 
+
+lemma e1 : ∃ x y : ℤ, x*x*x-y=0 ∧ y-8=0 := by find_sols
 
 lemma e2 : ∃ r : ℝ, r+r = 3 := by find_sols
 
+-- no new axioms were added to the environment.
+#print axioms

@@ -44,6 +44,7 @@ do hyps ← local_context,
 end
 
 open real
+open_locale real
 
 /-- This goal is plausible, so the tactic succeeds. -/
 example (x : ℤ) (h : x < 0) : x < 0 :=
@@ -63,6 +64,6 @@ Adding an extra condition to the above example,
 the goal becomes plausible,
 so the tactic succeeds.
 -/
-example (x : ℝ) (h1 : sin x = 0) (h2 : cos x > 0) (h3 : -pi < x ∧ x < pi) : x = 0 :=
+example (x : ℝ) (h1 : sin x = 0) (h2 : cos x > 0) (h3 : -π < x ∧ x < π) : x = 0 :=
 by plausibility_check; admit
 

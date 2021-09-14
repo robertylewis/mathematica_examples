@@ -79,8 +79,8 @@ do pe ← mathematica.run_command_on_2
      (λ e q, "Rationalize[" ++ e ++ " // LeanForm // Activate // N, " ++ q ++ "// LeanForm // Activate]")
      e q,
    val ← to_expr ```(%%pe : ℝ),
-   (lb, _) ← to_expr ```(%%val - %%q) >>= norm_num.derive',
-   (ub, _) ← to_expr ```(%%val + %%q) >>= norm_num.derive',
+   (lb, _) ← to_expr ```(%%val - %%q) >>= norm_num.derive,
+   (ub, _) ← to_expr ```(%%val + %%q) >>= norm_num.derive,
    tgt ← to_expr ```(%%lb < %%e ∧ %%e < %%ub),
    nm ← new_aux_decl_name,
    let nm' := `approx_axiom ++ nm,

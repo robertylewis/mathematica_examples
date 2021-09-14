@@ -193,9 +193,9 @@ Uncommenting the `pp` line above shows that we really are seeing full Lean expre
 
 constants y z : ℝ
 
-begin_mm_block
+begin_mm_block 
 
-"MyPoly ="(z^2-2*z+1);
+"MyPoly :="(z^2-2*z+1);
 "Factor[MyPoly]";
 
 "Factor["(y^10-z^10)"]";

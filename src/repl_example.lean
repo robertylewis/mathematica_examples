@@ -129,7 +129,7 @@ meta def command_comp.translate (to_unfold : list name) : command_comp → tacti
 meta def execute_list (to_unfold : list name) (is_img : bool) (l : list command_comp) : tactic pexpr :=
 do l ← l.mmap (command_comp.translate to_unfold), --tactic.trace $ string.join l,
    let cmd := if is_img then "MakeDataUrlFromImage[" ++ string.join l ++ "]" else string.join l,
-   s ← mathematica.execute_and_eval cmd,
+   s ← mathematica.execute_global cmd >>= parse_mmexpr_tac,
    mathematica.pexpr_of_mmexpr mathematica.trans_env.empty s
 
 meta def string_of_pos_comp (to_unfold : list name) :
@@ -195,7 +195,7 @@ constants y z : ℝ
 
 begin_mm_block 
 
-"MyPoly :="(z^2-2*z+1);
+"MyPoly ="(z^2-2*z+1);
 "Factor[MyPoly]";
 
 "Factor["(y^10-z^10)"]";
